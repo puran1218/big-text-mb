@@ -1,0 +1,5 @@
+{
+  "version": "1.0",
+  "title": "Big Text 大字",
+  "description": "全屏大字显示页（PWA）。安装后访问 /bigtext/，输入一句话全屏放大给别人看。Full-screen big text display as a static PWA page."
+}

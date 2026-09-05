@@ -1,0 +1,337 @@
+/* Big Text 大字 — Ferrari design language:
+   cinematic black, warm-white type, Ferrari Red reserved for ONE element per screen,
+   razor 2px corners, 1px border rings, 130/220ms expo motion. */
+
+:root {
+  --bg: #050505;
+  --surface: #111111;
+  --fg: #fffaf0;
+  --muted: #a89f91;
+  --faint: rgba(255, 250, 240, 0.28);
+  --ring: rgba(255, 250, 240, 0.1);
+  --ring-bright: rgba(255, 250, 240, 0.3);
+  --accent: #dc0000;
+  --accent-down: #b01e0a;
+  --danger: #ff3b30;
+  --radius-razor: 2px;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: radial-gradient(140% 100% at 50% 0%, #0c0c0c 0%, var(--bg) 55%) fixed;
+  color: var(--fg);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue",
+    "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* ---------- 编辑页 ---------- */
+
+.editor {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: calc(20px + env(safe-area-inset-top)) 24px calc(24px + env(safe-area-inset-bottom));
+}
+
+.editor-head {
+  padding-top: 8px;
+}
+
+.title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.app-title {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.app-title-annot {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.tagline {
+  margin: 6px 0 0;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.input-block {
+  margin: auto 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.text-input {
+  width: 100%;
+  min-height: min(42vh, 360px);
+  resize: none;
+  background: var(--surface);
+  border: 1px solid var(--ring);
+  border-radius: var(--radius-razor);
+  color: var(--fg);
+  caret-color: var(--accent);
+  font: inherit;
+  font-size: 22px;
+  line-height: 1.5;
+  padding: 18px 20px;
+  transition: border-color 220ms var(--ease);
+}
+
+.text-input:focus {
+  outline: none;
+  border-color: var(--ring-bright);
+}
+
+.text-input::placeholder {
+  color: var(--faint);
+}
+
+.counter-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.counter {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  transition: color 220ms var(--ease);
+}
+
+.counter.warn {
+  color: var(--danger);
+}
+
+.action-block {
+  padding-top: 20px;
+}
+
+/* Ferrari Red: the single accent element on this screen */
+.show-btn {
+  width: 100%;
+  height: 56px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-razor);
+  background: var(--accent);
+  color: #fff;
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.35em;
+  text-indent: 0.35em;
+  cursor: pointer;
+  transition: background 220ms var(--ease), transform 130ms var(--ease),
+    color 220ms var(--ease), border-color 220ms var(--ease);
+}
+
+.show-btn:hover:enabled {
+  background: var(--accent-down);
+}
+
+.show-btn:active:enabled {
+  transform: scale(0.98);
+}
+
+.show-btn:disabled {
+  background: var(--surface);
+  border-color: var(--ring);
+  color: var(--faint);
+  cursor: default;
+}
+
+/* ---------- 显示页 ---------- */
+
+.display {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.fit-stage {
+  position: absolute;
+  inset: 0;
+  padding: 5vmin;
+}
+
+.fit-text {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  color: #fff;
+  font-weight: 900;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  text-align: center;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.flash-overlay {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.flash-overlay.on {
+  animation: flash-pulse 2.5s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+@keyframes flash-pulse {
+  0% { opacity: 0; }
+  16% { opacity: 0.6; }
+  20% { opacity: 0.6; }
+  32% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flash-overlay.on {
+    animation-name: flash-pulse-calm;
+    animation-duration: 4s;
+  }
+
+  @keyframes flash-pulse-calm {
+    0% { opacity: 0; }
+    25% { opacity: 0.3; }
+    50% { opacity: 0; }
+    100% { opacity: 0; }
+  }
+}
+
+/* 点击后短暂显示的控制层 */
+.controls {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 180ms var(--ease);
+}
+
+.controls.show {
+  opacity: 1;
+}
+
+.controls .pill {
+  pointer-events: none;
+}
+
+.controls.show .pill {
+  pointer-events: auto;
+}
+
+.pill {
+  position: absolute;
+  top: calc(20px + env(safe-area-inset-top));
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  color: var(--fg);
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 180ms var(--ease), border-color 180ms var(--ease);
+}
+
+.back-btn {
+  left: 24px;
+}
+
+.flash-btn {
+  right: 24px;
+}
+
+/* 显示页的唯一红色元素：闪烁激活态 */
+.flash-btn.active {
+  background: var(--accent);
+  border-color: transparent;
+}
+
+.toasts {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(40px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.toast {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  color: var(--fg);
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-size: 15px;
+  font-weight: 500;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px);
+  transition: opacity 300ms var(--ease), transform 300ms var(--ease),
+    visibility 300ms;
+}
+
+.toast.show {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+
+@media (max-width: 380px) {
+  .editor {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}

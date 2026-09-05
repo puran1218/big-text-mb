@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#050505">
+  <meta name="description" content="输入一句话，全屏放大给别人看 / Type one line. Show it big.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="大字">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="./styles.css">
+  <title>大字 Big Text</title>
+</head>
+<body>
+  <!-- 编辑页 -->
+  <main class="editor" id="editorScreen">
+    <header class="editor-head">
+      <div class="title-row">
+        <h1 class="app-title" id="appTitle">大字</h1>
+        <span class="app-title-annot" id="appTitleAnnot">BIG TEXT</span>
+      </div>
+      <p class="tagline" id="appTagline">输入一句话，全屏放大给别人看</p>
+    </header>
+
+    <div class="input-block">
+      <textarea id="textInput" class="text-input" rows="6"
+        placeholder="输入要显示的文字" autocomplete="off" autocorrect="off"
+        autocapitalize="sentences" spellcheck="false"></textarea>
+      <div class="counter-row">
+        <span class="counter" id="charCounter">0/200</span>
+      </div>
+    </div>
+
+    <div class="action-block">
+      <button class="show-btn" id="showBtn" disabled>显示</button>
+    </div>
+  </main>
+
+  <!-- 显示页 -->
+  <section class="display" id="displayScreen" hidden>
+    <div class="fit-stage" id="fitStage">
+      <div class="fit-text" id="fitText" aria-live="polite"></div>
+    </div>
+
+    <div class="flash-overlay" id="flashOverlay" aria-hidden="true"></div>
+
+    <div class="controls" id="controlsOverlay">
+      <button class="pill back-btn" id="backBtn">‹ 返回</button>
+      <button class="pill flash-btn" id="flashBtn">闪烁</button>
+    </div>
+
+    <div class="toasts">
+      <div class="toast" id="doubleTapToast">双击屏幕开启闪动</div>
+      <div class="toast" id="landscapeToast">横过手机展示更清楚</div>
+    </div>
+  </section>
+
+  <script src="./app.js"></script>
+</body>
+</html>
