@@ -10,7 +10,7 @@
 ## 功能
 
 - 输入 200 字以内的一句话，`X/200` 计数在 180 字后变红
-- 全屏黑底白字，自动缩放到最大可容纳的字号
+- 全屏显示大字，自动缩放到最大可容纳的字号（默认黑底白字，颜色随主题）
 - 单击屏幕呼出「返回 / 闪烁」，双击屏幕直接切换闪烁提醒
 - 显示期间屏幕常亮（Wake Lock API，需要 iOS 16.4+ / 主流桌面浏览器）
 - 竖屏显示时提示「横过手机展示更清楚」
@@ -25,14 +25,41 @@
 相对 iOS 版的取舍：不做摇一摇（改为双击屏幕）、不做触感反馈、不做 Siri 意图
 （用快捷指令 + `?text=` 替代）。
 
+## 主题
+
+编辑页底部一排色块即主题选择器（最后一个「∞」是随机彩蛋），点击即时换肤，
+编辑页与显示页一起变，选择保存在浏览器本地。
+
+| 主题 | 效果 | 色板出处 |
+|---|---|---|
+| 经典黑白（默认） | 黑底白字，白色闪烁 | 现有 Ferrari 风格 |
+| 反色 | 纸白底黑字（阳光下可读） | minimal/paper 家族 |
+| 霓虹 | 荧光绿 + 辉光 | skills/neon（`#BBF351`） |
+| 矩阵 | 墨蓝黑底 + 矩阵绿 + 辉光 | skills/matrix（`#2DB58A on #0B0C14`） |
+| 机场琥珀屏 | 琥珀色磷光，老式翻牌屏质感 | vintage/retro 家族 |
+| 世嘉 | 深靛蓝底 + 黄字蓝辉光 | skills/sega（`#4502FF`/`#FFDA14`） |
+| 随机 | 每次进入显示页换一个主题（不会连续重复） | — |
+
+色板取自 [awesome-design-skills](https://github.com/bergside/awesome-design-skills)
+的风格 token；该仓库是给 AI 编程代理的设计风格指南注册库（SKILL.md/DESIGN.md），
+不是现成主题包，上表是手工翻译成显示页 token 的结果。
+
+实现约束（改主题时请保持）：
+
+- 每个主题就是 `styles.css` 里 `:root[data-theme="…"]` 的一组 CSS 变量，
+  JS 只负责切换 `data-theme`，无逐主题逻辑；
+- 所有主题的显示页前景/背景组合必须保持 WCAG AA 对比度（最低的矩阵绿 ≈ 6.4:1）；
+- 字号自适应只受几何尺寸影响，主题只动颜色，互不干扰；
+- 改了变量名或文件结构记得把 `service-worker.js` 的 `CACHE_NAME` 升一位。
+
 ## 目录结构
 
 ```text
 plugin.json        micro.blog 插件清单（title / description / version）
 static/bigtext/    可直接发布的完整应用（源码即产物，无构建步骤）
-  index.html       唯一入口，编辑页 / 显示页都在这一页内
-  styles.css       样式（Ferrari 风格：黑底 + 法拉利红点缀）
-  app.js           交互逻辑：字号自适应、双击闪烁、Wake Lock、双语
+  index.html       唯一入口，编辑页 / 显示页 / 主题选择器都在这一页内
+  styles.css       样式与主题 token（:root[data-theme=…] 每主题一组变量）
+  app.js           交互逻辑：字号自适应、双击闪烁、主题切换、Wake Lock、双语
   service-worker.js  离线缓存（network-first，联网时自动更新）
   manifest.webmanifest
   icons/           PWA 图标（取自 big-text 的 App Icon）
@@ -59,6 +86,6 @@ python3 -m http.server 8765 --directory static
 
 ## 与 iOS 版的关系
 
-iOS 原版见 [big-text](../big-text/) 仓库（SwiftUI，未上架）。
-本插件覆盖其 v1.2 的全部核心交互，是绕开 Apple Developer 年费与审核的
-发布途径。
+iOS 原版见 [big-text](../big-text/) 仓库（SwiftUI，未上架）。本插件覆盖其 v1.2
+的全部核心交互（摇一摇改为双击屏幕），并额外增加了 iOS 版没有的主题系统，
+是绕开 Apple Developer 年费与审核的发布途径。

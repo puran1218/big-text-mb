@@ -336,7 +336,9 @@
   // ---- 初始化 ----
 
   applyI18n();
-  themeSetting = store.get(STORAGE_THEME) || "classic";
+  const storedTheme = store.get(STORAGE_THEME);
+  themeSetting =
+    storedTheme === "random" || THEMES.includes(storedTheme) ? storedTheme : "classic";
   applyTheme(themeSetting === "random" ? rollTheme() : themeSetting);
   textInput.value = store.get(STORAGE_LAST_TEXT) || "";
   updateEditorState();
