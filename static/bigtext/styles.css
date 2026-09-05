@@ -1,9 +1,18 @@
-/* Big Text 大字 — Ferrari design language:
-   cinematic black, warm-white type, Ferrari Red reserved for ONE element per screen,
-   razor 2px corners, 1px border rings, 130/220ms expo motion. */
+/* Big Text 大字 — 主题化的设计 token。
+   基底语言来自 Ferrari design system（电影感黑底、单一强调色、2px 直角、1px 描边环、
+   130/220ms expo 动效）。6 个显示主题 + 随机，主题同时作用于编辑页与显示页，
+   每个主题的显示前景/背景组合都满足 WCAG AA 对比度。 */
 
 :root {
+  --radius-razor: 2px;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* 经典（默认）：Ferrari 电影感黑 + 法拉利红 */
+:root:not([data-theme]),
+:root[data-theme="classic"] {
   --bg: #050505;
+  --bg-glow: #0c0c0c;
   --surface: #111111;
   --fg: #fffaf0;
   --muted: #a89f91;
@@ -12,9 +21,124 @@
   --ring-bright: rgba(255, 250, 240, 0.3);
   --accent: #dc0000;
   --accent-down: #b01e0a;
+  --accent-text: #ffffff;
+  --control-bg: rgba(255, 255, 255, 0.1);
+  --control-border: rgba(255, 255, 255, 0.12);
+  --display-bg: #000000;
+  --display-fg: #ffffff;
+  --flash-color: #ffffff;
+  --display-glow: none;
   --danger: #ff3b30;
-  --radius-razor: 2px;
-  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* 反色：纸白底黑字（阳光下可读） */
+:root[data-theme="paper"] {
+  --bg: #f4f1ea;
+  --bg-glow: #ffffff;
+  --surface: #ffffff;
+  --fg: #111111;
+  --muted: #6b6459;
+  --faint: rgba(17, 17, 17, 0.32);
+  --ring: rgba(17, 17, 17, 0.14);
+  --ring-bright: rgba(17, 17, 17, 0.4);
+  --accent: #111111;
+  --accent-down: #000000;
+  --accent-text: #ffffff;
+  --control-bg: rgba(17, 17, 17, 0.06);
+  --control-border: rgba(17, 17, 17, 0.22);
+  --display-bg: #ffffff;
+  --display-fg: #111111;
+  --flash-color: #111111;
+  --display-glow: none;
+  --danger: #c5221f;
+}
+
+/* 霓虹（skills/neon：#BBF351 / #00BCFF） */
+:root[data-theme="neon"] {
+  --bg: #0a0a0f;
+  --bg-glow: #131320;
+  --surface: #14141c;
+  --fg: #bbf351;
+  --muted: #9aa085;
+  --faint: rgba(187, 243, 81, 0.35);
+  --ring: rgba(187, 243, 81, 0.18);
+  --ring-bright: rgba(187, 243, 81, 0.45);
+  --accent: #bbf351;
+  --accent-down: #a5de3f;
+  --accent-text: #0a0a0f;
+  --control-bg: rgba(187, 243, 81, 0.08);
+  --control-border: rgba(187, 243, 81, 0.25);
+  --display-bg: #050508;
+  --display-fg: #bbf351;
+  --flash-color: #bbf351;
+  --display-glow: 0 0 18px rgba(187, 243, 81, 0.45);
+  --danger: #ff3b30;
+}
+
+/* 矩阵（skills/matrix：#2DB58A on #0B0C14） */
+:root[data-theme="matrix"] {
+  --bg: #0b0c14;
+  --bg-glow: #10121f;
+  --surface: #12141e;
+  --fg: #2db58a;
+  --muted: #6e8b7e;
+  --faint: rgba(45, 181, 138, 0.35);
+  --ring: rgba(45, 181, 138, 0.18);
+  --ring-bright: rgba(45, 181, 138, 0.45);
+  --accent: #2db58a;
+  --accent-down: #26a078;
+  --accent-text: #050608;
+  --control-bg: rgba(45, 181, 138, 0.08);
+  --control-border: rgba(45, 181, 138, 0.25);
+  --display-bg: #0b0c14;
+  --display-fg: #2db58a;
+  --flash-color: #2db58a;
+  --display-glow: 0 0 16px rgba(45, 181, 138, 0.4);
+  --danger: #ff3b30;
+}
+
+/* 机场琥珀屏（vintage/retro 家族：老式翻牌/LED 屏质感） */
+:root[data-theme="amber"] {
+  --bg: #060505;
+  --bg-glow: #141008;
+  --surface: #14100c;
+  --fg: #ffb000;
+  --muted: #a08650;
+  --faint: rgba(255, 176, 0, 0.35);
+  --ring: rgba(255, 176, 0, 0.18);
+  --ring-bright: rgba(255, 176, 0, 0.45);
+  --accent: #ffb000;
+  --accent-down: #e69d00;
+  --accent-text: #0a0700;
+  --control-bg: rgba(255, 176, 0, 0.08);
+  --control-border: rgba(255, 176, 0, 0.25);
+  --display-bg: #030303;
+  --display-fg: #ffb000;
+  --flash-color: #ffb000;
+  --display-glow: 0 0 20px rgba(255, 176, 0, 0.35);
+  --danger: #ff3b30;
+}
+
+/* 世嘉（skills/sega：#4502FF / #FFDA14） */
+:root[data-theme="sega"] {
+  --bg: #0d0d26;
+  --bg-glow: #191940;
+  --surface: #16163a;
+  --fg: #ffda14;
+  --muted: #8b8bc5;
+  --faint: rgba(255, 218, 20, 0.35);
+  --ring: rgba(255, 218, 20, 0.18);
+  --ring-bright: rgba(255, 218, 20, 0.45);
+  --accent: #4502ff;
+  --accent-down: #3602cc;
+  --accent-text: #ffffff;
+  --control-bg: rgba(255, 255, 255, 0.08);
+  --control-border: rgba(255, 255, 255, 0.22);
+  --display-bg: #0d0d26;
+  --display-fg: #ffda14;
+  --flash-color: #ffda14;
+  --display-glow: 0 0 18px rgba(69, 2, 255, 0.55);
+  --danger: #ff3b30;
 }
 
 * {
@@ -28,13 +152,14 @@ body {
 }
 
 body {
-  background: radial-gradient(140% 100% at 50% 0%, #0c0c0c 0%, var(--bg) 55%) fixed;
+  background: radial-gradient(140% 100% at 50% 0%, var(--bg-glow) 0%, var(--bg) 55%) fixed;
   color: var(--fg);
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue",
     "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+  transition: background 300ms var(--ease), color 300ms var(--ease);
 }
 
 [hidden] {
@@ -139,18 +264,75 @@ button {
   color: var(--danger);
 }
 
+/* 主题选择器 */
+.theme-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 20px;
+  flex-wrap: wrap;
+}
+
+.theme-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-right: 2px;
+}
+
+.theme-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: 1px solid var(--ring);
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 130ms var(--ease);
+}
+
+.theme-dot:active {
+  transform: scale(0.92);
+}
+
+.theme-dot.selected {
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--fg);
+}
+
+.theme-dot[data-theme-option="random"].selected {
+  background: var(--fg);
+  color: var(--bg);
+  border-color: var(--fg);
+}
+
+.theme-dot[data-theme-option="classic"] { background: linear-gradient(135deg, #000000 50%, #fffaf0 50%); }
+.theme-dot[data-theme-option="paper"] { background: linear-gradient(135deg, #f6f4ef 50%, #111111 50%); }
+.theme-dot[data-theme-option="neon"] { background: linear-gradient(135deg, #0a0a0f 50%, #bbf351 50%); }
+.theme-dot[data-theme-option="matrix"] { background: linear-gradient(135deg, #0b0c14 50%, #2db58a 50%); }
+.theme-dot[data-theme-option="amber"] { background: linear-gradient(135deg, #060505 50%, #ffb000 50%); }
+.theme-dot[data-theme-option="sega"] { background: linear-gradient(135deg, #0d0d26 50%, #ffda14 50%); }
+
 .action-block {
   padding-top: 20px;
 }
 
-/* Ferrari Red: the single accent element on this screen */
+/* 每屏唯一的强调色元素：显示按钮 */
 .show-btn {
   width: 100%;
   height: 56px;
   border: 1px solid transparent;
   border-radius: var(--radius-razor);
   background: var(--accent);
-  color: #fff;
+  color: var(--accent-text);
   font-family: inherit;
   font-size: 17px;
   font-weight: 700;
@@ -181,7 +363,7 @@ button {
 .display {
   position: fixed;
   inset: 0;
-  background: #000;
+  background: var(--display-bg);
   user-select: none;
   -webkit-user-select: none;
 }
@@ -196,7 +378,8 @@ button {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  color: #fff;
+  color: var(--display-fg);
+  text-shadow: var(--display-glow);
   font-weight: 900;
   line-height: 1.08;
   letter-spacing: -0.02em;
@@ -209,7 +392,7 @@ button {
 .flash-overlay {
   position: absolute;
   inset: 0;
-  background: #fff;
+  background: var(--flash-color);
   opacity: 0;
   pointer-events: none;
 }
@@ -266,11 +449,11 @@ button {
   top: calc(20px + env(safe-area-inset-top));
   display: inline-flex;
   align-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--control-border);
+  background: var(--control-bg);
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
-  color: var(--fg);
+  color: var(--display-fg);
   border-radius: 999px;
   padding: 10px 18px;
   font-family: inherit;
@@ -288,10 +471,11 @@ button {
   right: 24px;
 }
 
-/* 显示页的唯一红色元素：闪烁激活态 */
+/* 显示页的唯一强调色元素：闪烁激活态 */
 .flash-btn.active {
   background: var(--accent);
   border-color: transparent;
+  color: var(--accent-text);
 }
 
 .toasts {
@@ -307,11 +491,11 @@ button {
 }
 
 .toast {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--control-bg);
+  border: 1px solid var(--control-border);
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
-  color: var(--fg);
+  color: var(--display-fg);
   border-radius: 999px;
   padding: 10px 18px;
   font-size: 15px;

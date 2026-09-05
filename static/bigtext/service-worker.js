@@ -1,4 +1,4 @@
-const CACHE_NAME = "bigtext-v1";
+const CACHE_NAME = "bigtext-v2";
 const ASSETS = [
   "./",
   "./index.html",

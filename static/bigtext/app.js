@@ -7,6 +7,17 @@
   const HINT_DURATION_MS = 2500;
   const STORAGE_LAST_TEXT = "bigtext.lastText";
   const STORAGE_HINT_SEEN = "bigtext.doubleTapHintSeen";
+  const STORAGE_THEME = "bigtext.theme";
+  const THEMES = ["classic", "paper", "neon", "matrix", "amber", "sega"];
+  // data-theme -> 浏览器 UI（meta theme-color）随主题走的底色
+  const THEME_COLOR = {
+    classic: "#050505",
+    paper: "#f4f1ea",
+    neon: "#0a0a0f",
+    matrix: "#0b0c14",
+    amber: "#060505",
+    sega: "#0d0d26",
+  };
 
   const I18N = {
     zh: {
@@ -22,6 +33,16 @@
       flashStop: "停止闪烁",
       doubleTapHint: "双击屏幕开启闪动",
       landscapeHint: "横过手机展示更清楚",
+      themeLabel: "主题",
+      themeNames: {
+        classic: "经典黑白",
+        paper: "反色",
+        neon: "霓虹",
+        matrix: "矩阵",
+        amber: "机场琥珀屏",
+        sega: "世嘉",
+        random: "随机",
+      },
     },
     en: {
       htmlLang: "en",
@@ -36,6 +57,16 @@
       flashStop: "Stop flash",
       doubleTapHint: "Double-tap to toggle flash",
       landscapeHint: "Turn phone for better display",
+      themeLabel: "Theme",
+      themeNames: {
+        classic: "Classic",
+        paper: "Paper",
+        neon: "Neon",
+        matrix: "Matrix",
+        amber: "Departures",
+        sega: "Sega",
+        random: "Random",
+      },
     },
   };
 
@@ -64,10 +95,30 @@
   let tapTimer = null;
   let hintTimer = null;
   let wakeLock = null;
+  let themeSetting = "classic"; // 用户选择：具体主题 id 或 "random"
+  let appliedTheme = "classic"; // 当前实际生效的主题
 
   // 不用 matchMedia(orientation)：部分环境里 resize 触发时它的状态还滞后
   function isPortrait() {
     return window.innerHeight > window.innerWidth;
+  }
+
+  function rollTheme(exclude) {
+    const pool = THEMES.filter((t) => t !== exclude);
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+
+  function applyTheme(id) {
+    appliedTheme = id;
+    document.documentElement.dataset.theme = id;
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.content = THEME_COLOR[id];
+    document.querySelectorAll(".theme-dot").forEach((dot) => {
+      const marked = themeSetting === "random" ? "random" : appliedTheme;
+      const on = dot.dataset.themeOption === marked;
+      dot.classList.toggle("selected", on);
+      dot.setAttribute("aria-checked", on ? "true" : "false");
+    });
   }
 
   const store = {
@@ -106,6 +157,11 @@
     flashBtn.textContent = lang.flash;
     doubleTapToast.textContent = lang.doubleTapHint;
     landscapeToast.textContent = lang.landscapeHint;
+    $("themeLabel").textContent = lang.themeLabel;
+    document.querySelectorAll(".theme-dot").forEach((dot) => {
+      const id = dot.dataset.themeOption;
+      dot.setAttribute("aria-label", lang.themeNames[id]);
+    });
   }
 
   function updateEditorState() {
@@ -166,6 +222,9 @@
 
   function enterDisplay() {
     if (!textInput.value.trim()) return;
+    if (themeSetting === "random") {
+      applyTheme(rollTheme(appliedTheme));
+    }
     mode = "display";
     editorScreen.hidden = true;
     displayScreen.hidden = false;
@@ -243,6 +302,14 @@
   backBtn.addEventListener("click", exitDisplay);
   flashBtn.addEventListener("click", () => setFlash(!flashOn));
 
+  document.querySelectorAll(".theme-dot").forEach((dot) => {
+    dot.addEventListener("click", () => {
+      themeSetting = dot.dataset.themeOption;
+      store.set(STORAGE_THEME, themeSetting);
+      applyTheme(themeSetting === "random" ? rollTheme(appliedTheme) : themeSetting);
+    });
+  });
+
   document.addEventListener("keydown", (event) => {
     if (mode !== "display") return;
     if (event.key === "Escape") {
@@ -269,6 +336,8 @@
   // ---- 初始化 ----
 
   applyI18n();
+  themeSetting = store.get(STORAGE_THEME) || "classic";
+  applyTheme(themeSetting === "random" ? rollTheme() : themeSetting);
   textInput.value = store.get(STORAGE_LAST_TEXT) || "";
   updateEditorState();
   if (window.matchMedia("(pointer: fine)").matches) {
