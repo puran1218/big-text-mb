@@ -1,4 +1,5 @@
-const CACHE_NAME = "bigtext-v2";
+const CACHE_NAME = "bigtext-v4";
+const APP_SHELL = self.registration.scope;
 const ASSETS = [
   "./",
   "./index.html",
@@ -24,15 +25,31 @@ self.addEventListener("activate", event => {
   self.clients.claim();
 });
 
-// 联网时优先取最新文件并更新缓存，离线时退回缓存
 self.addEventListener("fetch", event => {
-  if (event.request.method !== "GET") {
+  if (event.request.method !== "GET") return;
+
+  const requestUrl = new URL(event.request.url);
+  const inScope = requestUrl.href.startsWith(self.registration.scope);
+
+  if (event.request.mode === "navigate" && inScope) {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          if (response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(APP_SHELL, copy));
+          }
+          return response;
+        })
+        .catch(() => caches.match(APP_SHELL))
+    );
     return;
   }
+
   event.respondWith(
     fetch(event.request)
       .then(response => {
-        if (response.ok && event.request.url.startsWith(self.registration.scope)) {
+        if (response.ok && inScope && requestUrl.search === "") {
           const copy = response.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
         }

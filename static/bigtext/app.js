@@ -1,22 +1,19 @@
 (() => {
   "use strict";
 
-  const MAX_CHARS = 200;
-  const WARN_AT = 180;
   const TAP_WINDOW_MS = 260;
   const HINT_DURATION_MS = 2500;
   const STORAGE_LAST_TEXT = "bigtext.lastText";
   const STORAGE_HINT_SEEN = "bigtext.doubleTapHintSeen";
   const STORAGE_THEME = "bigtext.theme";
   const THEMES = ["classic", "paper", "neon", "matrix", "amber", "sega"];
-  // data-theme -> 浏览器 UI（meta theme-color）随主题走的底色
-  const THEME_COLOR = {
-    classic: "#050505",
-    paper: "#f4f1ea",
-    neon: "#0a0a0f",
-    matrix: "#0b0c14",
-    amber: "#060505",
-    sega: "#0d0d26",
+  const THEME_META = {
+    classic: { color: "#050505", scheme: "dark" },
+    paper: { color: "#f4f1ea", scheme: "light" },
+    neon: { color: "#0a0a0f", scheme: "dark" },
+    matrix: { color: "#0b0c14", scheme: "dark" },
+    amber: { color: "#060505", scheme: "dark" },
+    sega: { color: "#003da5", scheme: "dark" },
   };
 
   const I18N = {
@@ -25,22 +22,23 @@
       docTitle: "大字 Big Text",
       appTitle: "大字",
       appTitleAnnot: "BIG TEXT",
-      tagline: "输入一句话，全屏放大给别人看",
+      tagline: "输入文字，全屏放大给别人看",
       placeholder: "输入要显示的文字",
       show: "显示",
+      clear: "清除",
       back: "返回",
       flash: "闪烁",
       flashStop: "停止闪烁",
       doubleTapHint: "双击屏幕开启闪动",
-      landscapeHint: "横过手机展示更清楚",
+      landscapeHint: "横屏可以显示得更大",
       themeLabel: "主题",
       themeNames: {
         classic: "经典黑白",
         paper: "反色",
-        neon: "霓虹",
-        matrix: "矩阵",
-        amber: "机场琥珀屏",
-        sega: "世嘉",
+        neon: "青柠",
+        matrix: "翡翠",
+        amber: "琥珀",
+        sega: "钴蓝",
         random: "随机",
       },
     },
@@ -49,22 +47,23 @@
       docTitle: "Big Text 大字",
       appTitle: "Big Text",
       appTitleAnnot: "大 字",
-      tagline: "Type one line. Show it big.",
+      tagline: "Type anything. Show it big.",
       placeholder: "Enter text to display",
       show: "Show",
+      clear: "Clear",
       back: "Back",
       flash: "Flash",
       flashStop: "Stop flash",
       doubleTapHint: "Double-tap to toggle flash",
-      landscapeHint: "Turn phone for better display",
+      landscapeHint: "Landscape gives your text more room",
       themeLabel: "Theme",
       themeNames: {
         classic: "Classic",
         paper: "Paper",
-        neon: "Neon",
-        matrix: "Matrix",
-        amber: "Departures",
-        sega: "Sega",
+        neon: "Lime",
+        matrix: "Jade",
+        amber: "Amber",
+        sega: "Cobalt",
         random: "Random",
       },
     },
@@ -79,6 +78,7 @@
   const displayScreen = $("displayScreen");
   const textInput = $("textInput");
   const charCounter = $("charCounter");
+  const clearBtn = $("clearBtn");
   const showBtn = $("showBtn");
   const fitStage = $("fitStage");
   const fitText = $("fitText");
@@ -95,8 +95,9 @@
   let tapTimer = null;
   let hintTimer = null;
   let wakeLock = null;
-  let themeSetting = "classic"; // 用户选择：具体主题 id 或 "random"
-  let appliedTheme = "classic"; // 当前实际生效的主题
+  let themeSetting = "classic";
+  let appliedTheme = "classic";
+  let fitFrame = null;
 
   // 不用 matchMedia(orientation)：部分环境里 resize 触发时它的状态还滞后
   function isPortrait() {
@@ -111,8 +112,12 @@
   function applyTheme(id) {
     appliedTheme = id;
     document.documentElement.dataset.theme = id;
-    const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.content = THEME_COLOR[id];
+    const themeMeta = THEME_META[id];
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+    const colorSchemeMeta = document.querySelector('meta[name="color-scheme"]');
+    if (themeColorMeta) themeColorMeta.content = themeMeta.color;
+    if (colorSchemeMeta) colorSchemeMeta.content = themeMeta.scheme;
+    document.documentElement.style.colorScheme = themeMeta.scheme;
     document.querySelectorAll(".theme-dot").forEach((dot) => {
       const marked = themeSetting === "random" ? "random" : appliedTheme;
       const on = dot.dataset.themeOption === marked;
@@ -136,14 +141,16 @@
         /* 隐私模式等场景下写入失败可忽略 */
       }
     },
+    remove(key) {
+      try {
+        localStorage.removeItem(key);
+      } catch {
+        /* 隐私模式等场景下删除失败可忽略 */
+      }
+    },
   };
 
-  const charCount = (s) => Array.from(s).length;
-
-  function clampToLimit(s) {
-    const points = Array.from(s);
-    return points.length > MAX_CHARS ? points.slice(0, MAX_CHARS).join("") : s;
-  }
+  const charCount = (value) => Array.from(value).length;
 
   function applyI18n() {
     document.documentElement.lang = lang.htmlLang;
@@ -153,6 +160,7 @@
     $("appTagline").textContent = lang.tagline;
     textInput.placeholder = lang.placeholder;
     showBtn.textContent = lang.show;
+    clearBtn.textContent = lang.clear;
     backBtn.textContent = "‹ " + lang.back;
     flashBtn.textContent = lang.flash;
     doubleTapToast.textContent = lang.doubleTapHint;
@@ -166,9 +174,36 @@
 
   function updateEditorState() {
     const count = charCount(textInput.value);
-    charCounter.textContent = count + "/" + MAX_CHARS;
-    charCounter.classList.toggle("warn", count >= WARN_AT);
+    charCounter.textContent = count.toLocaleString();
+    clearBtn.hidden = count === 0;
     showBtn.disabled = textInput.value.trim().length === 0;
+  }
+
+  function scheduleFit() {
+    if (mode !== "display") return;
+    if (fitFrame !== null) cancelAnimationFrame(fitFrame);
+    fitFrame = requestAnimationFrame(() => {
+      fitFrame = null;
+      fitTextToStage();
+    });
+  }
+
+  function syncVisualViewport() {
+    const viewport = window.visualViewport;
+    const height = viewport ? viewport.height : window.innerHeight;
+    document.documentElement.style.setProperty("--vvh", height / 100 + "px");
+    const keyboardOpen =
+      document.activeElement === textInput &&
+      viewport &&
+      viewport.height < document.documentElement.clientHeight - 80;
+    document.documentElement.classList.toggle("keyboard-open", Boolean(keyboardOpen));
+    scheduleFit();
+  }
+
+  function refitAfterOrientationChange() {
+    scheduleFit();
+    setTimeout(scheduleFit, 120);
+    setTimeout(scheduleFit, 320);
   }
 
   // ---- 显示模式 ----
@@ -178,8 +213,8 @@
     const boxWidth = fitText.clientWidth;
     const boxHeight = fitText.clientHeight;
     if (!boxWidth || !boxHeight || !fitText.textContent) return;
-    let low = 12;
-    let high = Math.floor(Math.max(boxWidth, boxHeight) * 1.2);
+    let low = 8;
+    let high = Math.max(32, Math.floor(Math.max(boxWidth, boxHeight) * 1.5));
     let best = low;
     while (low <= high) {
       const mid = (low + high) >> 1;
@@ -222,6 +257,7 @@
 
   function enterDisplay() {
     if (!textInput.value.trim()) return;
+    textInput.blur();
     if (themeSetting === "random") {
       applyTheme(rollTheme(appliedTheme));
     }
@@ -229,11 +265,11 @@
     editorScreen.hidden = true;
     displayScreen.hidden = false;
     fitText.textContent = textInput.value;
+    syncVisualViewport();
     updateLandscapeToast();
     maybeShowDoubleTapHint();
-    // 同步先算一次，rAF 兜底（后台面板里 rAF 可能被节流）
     fitTextToStage();
-    requestAnimationFrame(fitTextToStage);
+    scheduleFit();
     requestWakeLock();
   }
 
@@ -245,6 +281,7 @@
     displayScreen.hidden = true;
     editorScreen.hidden = false;
     releaseWakeLock();
+    requestAnimationFrame(syncVisualViewport);
   }
 
   // ---- 屏幕常亮（Wake Lock） ----
@@ -272,10 +309,19 @@
   // ---- 事件 ----
 
   textInput.addEventListener("input", () => {
-    const clamped = clampToLimit(textInput.value);
-    if (clamped !== textInput.value) textInput.value = clamped;
-    store.set(STORAGE_LAST_TEXT, clamped);
+    store.set(STORAGE_LAST_TEXT, textInput.value);
     updateEditorState();
+  });
+
+  textInput.addEventListener("focus", syncVisualViewport);
+  textInput.addEventListener("blur", () => setTimeout(syncVisualViewport, 0));
+
+  clearBtn.addEventListener("click", () => {
+    textInput.value = "";
+    store.remove(STORAGE_LAST_TEXT);
+    updateEditorState();
+    textInput.focus();
+    syncVisualViewport();
   });
 
   showBtn.addEventListener("click", () => {
@@ -321,11 +367,23 @@
   });
 
   window.addEventListener("resize", () => {
-    if (mode === "display") {
-      fitTextToStage();
-      updateLandscapeToast();
-    }
+    syncVisualViewport();
+    if (mode === "display") updateLandscapeToast();
   });
+
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", syncVisualViewport);
+    window.visualViewport.addEventListener("scroll", syncVisualViewport);
+  }
+
+  window.addEventListener("orientationchange", refitAfterOrientationChange);
+  if (screen.orientation && screen.orientation.addEventListener) {
+    screen.orientation.addEventListener("change", refitAfterOrientationChange);
+  }
+
+  if ("ResizeObserver" in window) {
+    new ResizeObserver(scheduleFit).observe(fitStage);
+  }
 
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible" && mode === "display") {
@@ -336,6 +394,7 @@
   // ---- 初始化 ----
 
   applyI18n();
+  syncVisualViewport();
   const storedTheme = store.get(STORAGE_THEME);
   themeSetting =
     storedTheme === "random" || THEMES.includes(storedTheme) ? storedTheme : "classic";
@@ -346,12 +405,19 @@
     textInput.focus();
   }
 
-  // ?text=... 直接进入显示模式（可配合 iOS 快捷指令实现语音唤起）
-  const urlText = new URLSearchParams(window.location.search).get("text");
+  // ?text=... 可直接进入显示模式；读取后从地址栏移除文本参数。
+  const url = new URL(window.location.href);
+  const urlText = url.searchParams.get("text");
   if (urlText && urlText.trim()) {
-    textInput.value = clampToLimit(urlText);
+    textInput.value = urlText;
     updateEditorState();
     store.set(STORAGE_LAST_TEXT, textInput.value);
+    url.searchParams.delete("text");
+    history.replaceState(
+      history.state,
+      "",
+      url.pathname + (url.search ? url.search : "") + url.hash
+    );
     enterDisplay();
   }
 

@@ -1,11 +1,17 @@
 {
+  "id": "./",
   "name": "大字 Big Text",
   "short_name": "大字",
+  "description": "A tiny full-screen message board that automatically fits your text to the available screen.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#050505",
   "theme_color": "#050505",
+  "categories": [
+    "utilities",
+    "productivity"
+  ],
   "icons": [
     {
       "src": "./icons/icon-192.png",
@@ -18,12 +24,6 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
-    },
-    {
-      "src": "./icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
     }
   ]
 }
