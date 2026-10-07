@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="color-scheme" content="dark">
+  <meta name="color-scheme" content="dark light">
   <meta name="theme-color" content="#050505">
-  <meta name="description" content="输入一句话，全屏放大给别人看 / Type one line. Show it big.">
+  <meta name="description" content="输入文字，全屏放大给别人看 / Type anything. Show it big.">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="大字">
@@ -24,7 +24,7 @@
         <h1 class="app-title" id="appTitle">大字</h1>
         <span class="app-title-annot" id="appTitleAnnot">BIG TEXT</span>
       </div>
-      <p class="tagline" id="appTagline">输入一句话，全屏放大给别人看</p>
+      <p class="tagline" id="appTagline">输入文字，全屏放大给别人看</p>
     </header>
 
     <div class="input-block">
@@ -32,7 +32,8 @@
         placeholder="输入要显示的文字" autocomplete="off" autocorrect="off"
         autocapitalize="sentences" spellcheck="false"></textarea>
       <div class="counter-row">
-        <span class="counter" id="charCounter">0/200</span>
+        <button class="clear-btn" id="clearBtn" type="button" hidden>清除</button>
+        <span class="counter" id="charCounter" aria-live="polite">0</span>
       </div>
     </div>
 
@@ -40,11 +41,11 @@
       <span class="theme-label" id="themeLabel">主题</span>
       <button class="theme-dot" data-theme-option="classic" role="radio" aria-checked="false" aria-label="经典黑白"></button>
       <button class="theme-dot" data-theme-option="paper" role="radio" aria-checked="false" aria-label="反色"></button>
-      <button class="theme-dot" data-theme-option="neon" role="radio" aria-checked="false" aria-label="霓虹"></button>
-      <button class="theme-dot" data-theme-option="matrix" role="radio" aria-checked="false" aria-label="矩阵"></button>
-      <button class="theme-dot" data-theme-option="amber" role="radio" aria-checked="false" aria-label="机场琥珀屏"></button>
-      <button class="theme-dot" data-theme-option="sega" role="radio" aria-checked="false" aria-label="世嘉"></button>
-      <button class="theme-dot" data-theme-option="random" role="radio" aria-checked="false" aria-label="随机">∞</button>
+      <button class="theme-dot" data-theme-option="neon" role="radio" aria-checked="false" aria-label="青柠"></button>
+      <button class="theme-dot" data-theme-option="matrix" role="radio" aria-checked="false" aria-label="翡翠"></button>
+      <button class="theme-dot" data-theme-option="amber" role="radio" aria-checked="false" aria-label="琥珀"></button>
+      <button class="theme-dot" data-theme-option="sega" role="radio" aria-checked="false" aria-label="钴蓝"></button>
+      <button class="theme-dot" data-theme-option="random" role="radio" aria-checked="false" aria-label="随机"></button>
     </div>
 
     <div class="action-block">
@@ -67,7 +68,7 @@
 
     <div class="toasts">
       <div class="toast" id="doubleTapToast">双击屏幕开启闪动</div>
-      <div class="toast" id="landscapeToast">横过手机展示更清楚</div>
+      <div class="toast" id="landscapeToast">横屏可以显示得更大</div>
     </div>
   </section>
 
