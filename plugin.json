@@ -1,5 +1,5 @@
 {
   "version": "1.1",
   "title": "Big Text 大字",
-  "description": "全屏大字显示页（PWA），响应式适配手机和 iPad，自动字号 fitting、6 个高对比主题 + 随机主题。安装后访问 /bigtext/。Full-screen responsive big text display as a static PWA page."
+  "description": "Turn any phone, tablet, or browser into a full-screen message board. Big Text automatically fits your text to the screen, works offline as a PWA, and includes high-contrast themes."
 }
