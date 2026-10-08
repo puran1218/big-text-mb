@@ -98,6 +98,8 @@
   let themeSetting = "classic";
   let appliedTheme = "classic";
   let fitFrame = null;
+  let landscapeHintTimer = null;
+  let displayWasPortrait = false;
 
   // 不用 matchMedia(orientation)：部分环境里 resize 触发时它的状态还滞后
   function isPortrait() {
@@ -190,18 +192,29 @@
 
   function syncVisualViewport() {
     const viewport = window.visualViewport;
-    const height = viewport ? viewport.height : window.innerHeight;
-    document.documentElement.style.setProperty("--vvh", height / 100 + "px");
+    const root = document.documentElement;
+    const layoutHeight = Math.max(root.clientHeight, window.innerHeight);
     const keyboardOpen =
+      mode === "editor" &&
       document.activeElement === textInput &&
       viewport &&
-      viewport.height < document.documentElement.clientHeight - 80;
-    document.documentElement.classList.toggle("keyboard-open", Boolean(keyboardOpen));
+      viewport.scale < 1.1 &&
+      viewport.height < layoutHeight - 120;
+
+    root.classList.toggle("keyboard-open", Boolean(keyboardOpen));
+    if (keyboardOpen) {
+      root.style.setProperty("--keyboard-height", viewport.height + "px");
+      root.style.setProperty("--keyboard-top", viewport.offsetTop + "px");
+    } else {
+      root.style.removeProperty("--keyboard-height");
+      root.style.removeProperty("--keyboard-top");
+    }
     scheduleFit();
   }
 
   function refitAfterOrientationChange() {
     scheduleFit();
+    if (mode === "display") updateLandscapeToast();
     setTimeout(scheduleFit, 120);
     setTimeout(scheduleFit, 320);
   }
@@ -242,7 +255,22 @@
   }
 
   function updateLandscapeToast() {
-    landscapeToast.classList.toggle("show", mode === "display" && isPortrait());
+    const portrait = mode === "display" && isPortrait();
+    if (!portrait) {
+      displayWasPortrait = false;
+      clearTimeout(landscapeHintTimer);
+      landscapeHintTimer = null;
+      landscapeToast.classList.remove("show");
+      return;
+    }
+    if (displayWasPortrait) return;
+
+    displayWasPortrait = true;
+    landscapeToast.classList.add("show");
+    landscapeHintTimer = setTimeout(() => {
+      landscapeToast.classList.remove("show");
+      landscapeHintTimer = null;
+    }, HINT_DURATION_MS);
   }
 
   function maybeShowDoubleTapHint() {
@@ -277,7 +305,7 @@
     mode = "editor";
     setFlash(false);
     setControlsVisible(false);
-    landscapeToast.classList.remove("show");
+    updateLandscapeToast();
     displayScreen.hidden = true;
     editorScreen.hidden = false;
     releaseWakeLock();

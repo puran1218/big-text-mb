@@ -1,4 +1,4 @@
-const CACHE_NAME = "bigtext-v4";
+const CACHE_NAME = "bigtext-v5";
 const APP_SHELL = self.registration.scope;
 const ASSETS = [
   "./",
