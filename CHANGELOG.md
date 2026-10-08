@@ -2,7 +2,14 @@
 
 All notable user-visible changes to Big Text are recorded here.
 
-## 1.1 — Unreleased
+## 1.1.1 — Unreleased
+
+### Fixed
+
+- Keep the text editor visible and stable when the iOS/iPadOS software keyboard opens; preserve the header and allow scrolling inside the visible editor on short screens
+- Show the portrait orientation tip briefly, then automatically dismiss it rather than leaving it on screen
+
+## 1.1 — 2026-10-07
 
 ### Added
 
