@@ -10,7 +10,9 @@ Minimum matrix:
 
 - iPhone portrait: type, Clear, Show, Back
 - iPhone portrait → landscape → portrait while showing text
-- iPad portrait with software keyboard open: tap Show without manually dismissing the keyboard
+- iPad portrait with software keyboard open: the input box and caret remain visible before and during typing; tap Show without manually dismissing the keyboard
+- iPhone portrait: focus an empty textarea, type, clear, dismiss and reopen the keyboard without the editor jumping out of view
+- Portrait display: the landscape suggestion disappears after about 2.5 seconds, and does not reappear until entering the display again or rotating back from landscape
 - iPad landscape
 - iPad Split View or a narrow resized browser window
 - long text well beyond 200 characters
